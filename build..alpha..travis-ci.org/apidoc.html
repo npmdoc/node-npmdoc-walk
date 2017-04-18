@@ -145,6 +145,28 @@
 
     </ol></li>
 
+    <li class="apidocModuleLi"><a href="#apidoc.module.walk.walk">module walk.walk</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.walk.walk.walk">
+            function <span class="apidocSignatureSpan">walk.</span>walk
+            <span class="apidocSignatureSpan">(path, opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.walk.walk.walkSync">
+            function <span class="apidocSignatureSpan">walk.walk.</span>walkSync
+            <span class="apidocSignatureSpan">(path, opts)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
 </ol></div>
 
 <div class="apidocSectionDiv">
@@ -234,7 +256,23 @@ walker.on(&#x22;names&#x22;, function (root, nodeNamesArray) {
   });
   return nodeGroups;
 }</pre></li>
-    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+  me._wcurfiles.forEach(wFilesHandlerWrapper, me);
+  me._wPostFilesHandler();
+} else {
+  forEachAsync(me._wcurfiles, me._wFilesHandler, me).then(me._wPostFilesHandler);
+}
+  };
+  Walker.prototype._wReaddirHandler = function (err, files) {
+var fnodeGroups = TypeEmitter.<span class="apidocCodeKeywordSpan">createNodeGroups</span>()
+  , me = this
+  , parent
+  , child
+  ;
+
+me._wfnodegroups = fnodeGroups;
+me._wcurfiles = files;
+...</pre></li>
     </ul>
 
 
@@ -258,7 +296,22 @@ walker.on(&#x22;names&#x22;, function (root, nodeNamesArray) {
   emitter.emit(&#x22;node&#x22;, path, stats, nextWhenReady);
   nextWhenReady();
 }</pre></li>
-    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+    // TODO v3.0 (don&#x27;t noop the next if there are listeners)
+    me.emit(&#x27;nodeError&#x27;, me._wcurpath, stat, noop);
+    me._wfnodegroups.errors.push(stat);
+    me._wCurFileCallback();
+  } else {
+    TypeEmitter.sortFnodesByType(stat, me._wfnodegroups);
+    // NOTE: wCurFileCallback doesn&#x27;t need thisness, so this is okay
+    TypeEmitter.<span class="apidocCodeKeywordSpan">emitNodeType</span>(me, me._wcurpath, stat, me._wCurFileCallback, me);
+  }
+};
+Walker.prototype._wFilesHandler = function (cont, file) {
+  var statPath
+    , me = this
+    ;
+...</pre></li>
     </ul>
 
 
@@ -285,7 +338,24 @@ walker.on(&#x22;names&#x22;, function (root, nodeNamesArray) {
   });
   nextWhenReady();
 }</pre></li>
-    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+
+if (me._wfnodegroups.errors.length) {
+  // TODO v3.0 (don&#x27;t noop the next)
+  // .errors is an array of stats with { name: name, error: error }
+  me.emit(&#x27;errors&#x27;, me._wcurpath, me._wfnodegroups.errors, noop);
+}
+// XXX emitNodeTypes still needs refactor
+TypeEmitter.<span class="apidocCodeKeywordSpan">emitNodeTypeGroups</span>(me, me._wcurpath, me._wfnodegroups, me._wOnEmitDone, me
+);
+  };
+  Walker.prototype._wReadFiles = function () {
+var me = this
+  ;
+
+if (!me._wcurfiles || 0 === me._wcurfiles.length) {
+  return me._wNext();
+...</pre></li>
     </ul>
 
 
@@ -309,7 +379,23 @@ walker.on(&#x22;names&#x22;, function (root, nodeNamesArray) {
     }
   }
 }</pre></li>
-    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+    stat.error = err;
+    //me.emit(&#x27;error&#x27;, curpath, stat);
+    // TODO v3.0 (don&#x27;t noop the next if there are listeners)
+    me.emit(&#x27;nodeError&#x27;, me._wcurpath, stat, noop);
+    me._wfnodegroups.errors.push(stat);
+    me._wCurFileCallback();
+  } else {
+    TypeEmitter.<span class="apidocCodeKeywordSpan">sortFnodesByType</span>(stat, me._wfnodegroups);
+    // NOTE: wCurFileCallback doesn&#x27;t need thisness, so this is okay
+    TypeEmitter.emitNodeType(me, me._wcurpath, stat, me._wCurFileCallback, me);
+  }
+};
+Walker.prototype._wFilesHandler = function (cont, file) {
+  var statPath
+    , me = this
+...</pre></li>
     </ul>
 
 
@@ -317,6 +403,73 @@ walker.on(&#x22;names&#x22;, function (root, nodeNamesArray) {
 
 
 
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.walk.walk" id="apidoc.module.walk.walk">module walk.walk</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.walk.walk.walk" id="apidoc.element.walk.walk.walk">
+        function <span class="apidocSignatureSpan">walk.</span>walk
+        <span class="apidocSignatureSpan">(path, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">walk = function (path, opts) {
+  return new Walker(path, opts, false);
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+&#x22;use strict&#x22;;
+
+var walk = require(&#x27;walk&#x27;)
+  , fs = require(&#x27;fs&#x27;)
+  , walker
+  ;
+
+walker = walk.<span class="apidocCodeKeywordSpan">walk</span>(&#x22;/tmp&#x22;, options);
+
+walker.on(&#x22;file&#x22;, function (root, fileStats, next) {
+  fs.readFile(fileStats.name, function () {
+    // doStuff
+    next();
+  });
+});
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.walk.walk.walkSync" id="apidoc.element.walk.walk.walkSync">
+        function <span class="apidocSignatureSpan">walk.walk.</span>walkSync
+        <span class="apidocSignatureSpan">(path, opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">walkSync = function (path, opts) {
+  return new Walker(path, opts, true);
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+  // directories with these keys will be skipped
+, filters: [&#x22;Temp&#x22;, &#x22;_Temp&#x22;]
+};
+
+walker = walk.walk(&#x22;/tmp&#x22;, options);
+
+// OR
+// walker = walk.<span class="apidocCodeKeywordSpan">walkSync</span>(&#x22;/tmp&#x22;, options);
+
+walker.on(&#x22;names&#x22;, function (root, nodeNamesArray) {
+  nodeNamesArray.sort(function (a, b) {
+    if (a &#x3e; b) return 1;
+    if (a &#x3c; b) return -1;
+    return 0;
+  });
+...</pre></li>
+    </ul>
 
 
 </div>
